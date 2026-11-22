@@ -356,8 +356,6 @@ def src_freelancer(cutoff, args):
                            (p.get("description") or p.get("preview_description") or "") + (f"\n\nBudget: {pay}" if pay else ""),
                            tags=skills, _need_roblox=True, _strict_roblox=True)
             job["_pay"] = pay
-            if hi or lo:
-                job["_usd"] = round((hi or lo) * ROUGH_USD.get(cur, 0), 2) or None
             jobs.append(job)
         time.sleep(1)
     return jobs
@@ -441,21 +439,46 @@ def categorize(job):
     return cats or ["General 3D"]
 
 
-def estimate_usd(pay_text):
-    """Rough largest single amount in USD, for sorting. Robux uses the DevEx rate."""
-    best = 0.0
-    for m in re.finditer(r"(usd|us\$|\$|€|£|r\$|robux)?\s?(\d[\d,]*(?:\.\d+)?)\s*(k)?\s*(usd|eur|gbp|robux|r\$|dollars)?",
-                         pay_text, re.I):
-        cur = (m.group(1) or m.group(4) or "").lower()
-        if not cur:
+CURRENCY_ALIASES = {"$": "USD", "us$": "USD", "usd": "USD", "dollars": "USD", "dollar": "USD",
+                    "€": "EUR", "eur": "EUR", "euro": "EUR", "euros": "EUR", "£": "GBP", "gbp": "GBP",
+                    "₹": "INR", "r$": "ROBUX", "robux": "ROBUX"}
+_CUR = "|".join(sorted({re.escape(c) for c in list(CURRENCY_ALIASES) + [c.lower() for c in ROUGH_USD]},
+                       key=len, reverse=True))
+_NUM = r"(\d[\d,]*(?:\.\d+)?)\s*(k\b)?"
+MONEY = re.compile(rf"(?:({_CUR})\s?)?{_NUM}(?:\s*(?:-|–|to)\s*(?:{_CUR})?\s?{_NUM})?\s*(?:({_CUR})(?![a-z]))?", re.I)
+
+
+def pay_to_usd(pay_text):
+    """Convert every amount in a pay text to rough US dollars.
+    Returns (low, high, was_converted). Robux uses Roblox's DevEx rate."""
+    lo = hi = None
+    converted = False
+    for m in MONEY.finditer(pay_text or ""):
+        code = (m.group(1) or m.group(6) or "").lower()
+        code = CURRENCY_ALIASES.get(code, code.upper())
+        if not code:
+            continue
+        rate = DEVEX_USD_PER_ROBUX if code == "ROBUX" else ROUGH_USD.get(code)
+        if not rate:
             continue
         try:
-            n = float(m.group(2).replace(",", "")) * (1000 if m.group(3) else 1)
+            a = float(m.group(2).replace(",", "")) * (1000 if m.group(3) else 1)
+            b = float(m.group(4).replace(",", "")) * (1000 if m.group(5) else 1) if m.group(4) else a
         except ValueError:
             continue
-        usd = n * DEVEX_USD_PER_ROBUX if cur in ("r$", "robux") else n
-        best = max(best, usd)
-    return round(best, 2)
+        a, b = a * rate, b * rate
+        lo = a if lo is None else min(lo, a)
+        hi = b if hi is None else max(hi, b)
+        converted |= code != "USD"
+    return lo, hi, converted
+
+
+def usd_label(lo, hi):
+    def f(x):
+        return "<$1" if x < 1 else f"${x:,.0f}"
+    if lo is None:
+        return ""
+    return "≈ " + (f(lo) if round(lo) == round(hi) else f"{f(lo)}–{f(hi)[1:] if hi >= 1 else f(hi)}") + " USD"
 
 
 # --------------------------------------------------------------- filtering --
@@ -519,7 +542,7 @@ def write_csv(jobs, path):
                     "Posted by", "Link", "Description"])
         for j in jobs:
             w.writerow([j["posted"].strftime("%Y-%m-%d"), j["source"], j["title"], "; ".join(j["cats"]),
-                        j["pay"], j["usd"] or "", "; ".join(j["flags"]), j["author"], j["url"], j["text"][:1500]])
+                        j["pay"], j["usd_text"] or (f"${j['usd']:,.0f}" if j["usd"] else ""), "; ".join(j["flags"]), j["author"], j["url"], j["text"][:1500]])
 
 
 def write_html(jobs, path, errors, days, schedule_minute=None):
@@ -527,7 +550,7 @@ def write_html(jobs, path, errors, days, schedule_minute=None):
              "s": "Reddit" if j["source"].startswith("Reddit") else j["source"], "ss": j["source"],
              "a": j["author"], "d": j["posted"].isoformat(), "fs": j["first_seen"], "p": j["pay"],
              "usd": j["usd"], "c": j["cats"], "x": j["text"][:3500], "sc": j["score"], "f": j["flags"],
-             "studio": bool(j.get("_studio")), "up": UNPAID_FLAG in j["flags"]} for j in jobs]
+             "studio": bool(j.get("_studio")), "up": UNPAID_FLAG in j["flags"], "uc": j["usd_text"]} for j in jobs]
     meta = {"generated": datetime.now(timezone.utc).isoformat(), "days": days,
             "errors": errors, "sources": [label for label, _ in SOURCES], "schedule_minute": schedule_minute}
     page = (TEMPLATE_FILE.read_text(encoding="utf-8")
@@ -598,7 +621,12 @@ def main():
     for j in jobs:
         j["first_seen"] = seen.setdefault(j["url"], now)
         j["cats"] = categorize(j)
-        j["usd"] = j.get("_usd") or estimate_usd(j["pay"])
+        lo, hi, converted = pay_to_usd(j["pay"])
+        j["usd"] = round(hi, 2) if hi else 0
+        unit = re.search(r"/\s*h(?:ou)?r\b|per hour|hourly|(?:per|/|an?)\s*(?:model|asset|prop|item)", j["pay"], re.I)
+        unit = ("/hr" if "h" in unit.group(0).lower()[:3] or "hour" in unit.group(0).lower()
+                else " per " + re.sub(r".*(model|asset|prop|item).*", r"\1", unit.group(0).lower())) if unit else ""
+        j["usd_text"] = usd_label(lo, hi) + unit if converted else ""
     SEEN_FILE.write_text(json.dumps(seen), encoding="utf-8")
 
     jobs.sort(key=lambda j: j["posted"], reverse=True)

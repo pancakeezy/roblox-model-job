@@ -92,6 +92,7 @@ main{padding:14px 0 40px}
 .badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .badge{font-size:12px;border-radius:7px;padding:2px 8px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
 .badge.pay{background:var(--pay-soft);color:var(--pay);font-weight:600;white-space:normal}
+.badge.usd{background:var(--pay);color:var(--surface);font-weight:700;font-variant-numeric:tabular-nums}
 .badge.new{background:var(--new-soft);color:var(--new);font-weight:700;letter-spacing:.02em}
 .badge.warn{background:var(--warn-soft);color:var(--warn);white-space:normal}
 .badge.studio{background:var(--brand-soft);color:var(--brand);font-weight:600}
@@ -204,7 +205,7 @@ details[open] summary svg{transform:rotate(90deg)}
         <li>Ask for part of the money up front, or for payment after each model.</li>
         <li>Send screenshots or a watermarked preview, and hand over the .blend / .fbx after you're paid.</li>
         <li>Never download "test files" or run programs a client sends you.</li>
-        <li>Robux amounts show a rough dollar value using Roblox's DevEx rate. What you'd actually cash out depends on DevEx rules.</li>
+        <li>Green "≈ USD" tags are rough conversions to US dollars. Robux use Roblox's DevEx cash-out rate, and what you actually receive depends on DevEx rules.</li>
       </ul>
     </div>
     <div class="panel">
@@ -381,7 +382,7 @@ const ICON = {
 };
 
 function card(j) {
-  const usd = j.usd && /robux|r\$/i.test(j.p) ? ` <span title="Rough value at Roblox's DevEx rate">(≈${money(j.usd)})</span>` : '';
+  const usd = j.uc ? `<span class="badge usd" title="Rough conversion to US dollars. Robux use Roblox's DevEx cash-out rate.">${esc(j.uc)}</span>` : '';
   const isHidden = hidden.has(j.id);
   return `<article class="job${j.isNew ? ' is-new' : ''}" data-id="${esc(j.id)}">
     <div class="job-head">
@@ -398,7 +399,7 @@ function card(j) {
     </div>
     <div class="badges">
       ${j.isNew ? '<span class="badge new">NEW</span>' : ''}
-      ${j.p ? `<span class="badge pay">${esc(j.p)}${usd}</span>` : ''}
+      ${j.p ? `<span class="badge pay">${esc(j.p)}</span>` : ''}${usd}
       ${j.studio ? '<span class="badge studio">Studio job</span>' : ''}
       ${j.c.map(c => `<span class="badge">${esc(c)}</span>`).join('')}
       ${j.f.map(f => `<span class="badge warn">${esc(f)}</span>`).join('')}

@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roblox Model Jobs</title>
+<meta name="description" content="Paid Roblox 3D modeling jobs gathered from forums and job boards.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='5' width='22' height='22' rx='4' transform='rotate(12 16 16)' fill='%23e8452c'/%3E%3Crect x='13' y='13' width='6' height='6' transform='rotate(12 16 16)' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f5f7;--surface:#ffffff;--surface-2:#eef0f3;--ink:#14161a;--ink-2:#454a54;--mute:#6c7280;
+  --line:#e2e5ea;--line-2:#d3d7de;--brand:#e8452c;--brand-ink:#ffffff;--brand-soft:#fde9e5;
+  --pay:#0b7a42;--pay-soft:#e3f5ea;--new:#1d63d8;--new-soft:#e5eefc;--warn:#9a5b00;--warn-soft:#fff3d6;
+  --star:#d99a00;--shadow:0 1px 2px rgba(20,22,26,.05),0 2px 8px rgba(20,22,26,.04);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1114;--surface:#181b20;--surface-2:#20242b;--ink:#eef0f3;--ink-2:#c3c8d1;--mute:#8d94a1;
+  --line:#262b33;--line-2:#323843;--brand:#ff5f45;--brand-ink:#ffffff;--brand-soft:#3a1d18;
+  --pay:#4fd08a;--pay-soft:#16301f;--new:#6ea8ff;--new-soft:#182640;--warn:#f2b453;--warn-soft:#33270f;
+  --star:#ffc53d;--shadow:none;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f1114;--surface:#181b20;--surface-2:#20242b;--ink:#eef0f3;--ink-2:#c3c8d1;--mute:#8d94a1;
+  --line:#262b33;--line-2:#323843;--brand:#ff5f45;--brand-ink:#ffffff;--brand-soft:#3a1d18;
+  --pay:#4fd08a;--pay-soft:#16301f;--new:#6ea8ff;--new-soft:#182640;--warn:#f2b453;--warn-soft:#33270f;
+  --star:#ffc53d;--shadow:none;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+
+/* Header */
+.top{padding:28px 0 18px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;flex:none}
+h1{font-size:26px;line-height:1.15;margin:0;letter-spacing:-.02em}
+.updated{color:var(--mute);font-size:13px;margin-top:2px}
+.theme{margin-left:auto;border:1px solid var(--line-2);background:var(--surface);border-radius:10px;width:38px;height:38px;display:grid;place-items:center}
+.theme svg{width:18px;height:18px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.stat span{color:var(--mute);font-size:12.5px}
+.stat.accent b{color:var(--pay)}
+.stat.blue b{color:var(--new)}
+
+/* Filter bar */
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 0 10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.search{flex:1 1 260px;position:relative}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--mute)}
+.search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit}
+select{padding:9px 10px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;max-width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:5px 12px;font-size:13px;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.chip .n{color:var(--mute);font-size:12px;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
+.chip.toggle[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.sep{width:1px;height:20px;background:var(--line-2);margin:0 2px}
+
+/* List */
+main{padding:14px 0 40px}
+.count{color:var(--mute);font-size:13px;margin:0 0 10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.linkbtn{background:none;border:0;padding:0;color:var(--new);font-size:13px;text-decoration:underline;text-underline-offset:2px}
+.job{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:10px;box-shadow:var(--shadow);position:relative}
+.job.is-new{border-left:3px solid var(--new)}
+.job-head{display:flex;gap:12px;align-items:flex-start}
+.job-main{flex:1;min-width:0}
+.job h2{font-size:16.5px;line-height:1.35;margin:0;overflow-wrap:anywhere;letter-spacing:-.005em}
+.job h2 a{text-decoration:none}
+.job h2 a:hover{color:var(--brand)}
+.meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-top:6px;font-size:12.5px;color:var(--mute)}
+.dot::before{content:"·";margin-right:10px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.badge{font-size:12px;border-radius:7px;padding:2px 8px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.badge.pay{background:var(--pay-soft);color:var(--pay);font-weight:600;white-space:normal}
+.badge.new{background:var(--new-soft);color:var(--new);font-weight:700;letter-spacing:.02em}
+.badge.warn{background:var(--warn-soft);color:var(--warn);white-space:normal}
+.badge.studio{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.actions{display:flex;gap:4px;flex:none}
+.icon{width:34px;height:34px;border-radius:9px;border:1px solid transparent;background:none;display:grid;place-items:center;color:var(--mute)}
+.icon:hover{background:var(--surface-2);color:var(--ink)}
+.icon svg{width:18px;height:18px}
+.icon.on{color:var(--star)}
+.icon.on svg{fill:currentColor}
+details{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:600;list-style:none;display:flex;gap:6px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary svg{width:14px;height:14px;transition:transform .15s}
+details[open] summary svg{transform:rotate(90deg)}
+.body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6;color:var(--ink-2);margin:8px 0 4px;max-height:420px;overflow:auto}
+.open{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:var(--brand);color:var(--brand-ink);text-decoration:none;font-size:13px;font-weight:600;border-radius:9px;padding:7px 12px}
+.open svg{width:14px;height:14px}
+.empty{text-align:center;padding:48px 16px;color:var(--mute);background:var(--surface);border:1px dashed var(--line-2);border-radius:16px}
+
+/* Footer */
+.foot{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;font-size:13.5px;color:var(--ink-2)}
+.panel h3{font-size:14px;margin:0 0 8px;color:var(--ink)}
+.panel ul{margin:0;padding-left:18px}
+.panel li{margin:3px 0}
+.panel .err{color:var(--warn)}
+.fine{color:var(--mute);font-size:12px;margin:18px 0 0;text-align:center}
+
+@media (max-width:720px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .foot{grid-template-columns:1fr}
+  h1{font-size:22px}
+  .job{padding:14px}
+  .sep{display:none}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none}
+}
+</style>
+</head>
+<body>
+<header class="wrap top">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="5" width="22" height="22" rx="4" transform="rotate(12 16 16)" fill="var(--brand)"/><rect x="13" y="13" width="6" height="6" transform="rotate(12 16 16)" fill="#fff"/></svg>
+    <div>
+      <h1>Roblox Model Jobs</h1>
+      <div class="updated" id="updated"></div>
+    </div>
+    <button class="theme" id="theme" title="Switch light / dark" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="row">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="q" placeholder="Search: low poly, sword, horror, usd…" aria-label="Search jobs">
+      </label>
+      <select id="sort" aria-label="Sort jobs">
+        <option value="date">Newest first</option>
+        <option value="pay">Highest pay first</option>
+        <option value="score">Best match first</option>
+      </select>
+      <select id="src" aria-label="Filter by source"><option value="">All sources</option></select>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+  <div class="foot">
+    <div class="panel">
+      <h3>Before you take a job</h3>
+      <ul>
+        <li>Agree on the price, the deadline and the number of revisions in writing first.</li>
+        <li>Ask for part of the money up front, or for payment after each model.</li>
+        <li>Send screenshots or a watermarked preview, and hand over the .blend / .fbx after you're paid.</li>
+        <li>Never download "test files" or run programs a client sends you.</li>
+        <li>Robux amounts show a rough dollar value using Roblox's DevEx rate. What you'd actually cash out depends on DevEx rules.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Where these come from</h3>
+      <ul id="sources"></ul>
+    </div>
+  </div>
+  <p class="fine">Saved and hidden jobs are remembered only in this browser.</p>
+</main>
+
+<script>
+const JOBS = __DATA__;
+const META = __META__;
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('rmj:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('rmj:' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// Theme
+const root = document.documentElement;
+const savedTheme = store.get('theme', null);
+if (savedTheme) root.dataset.theme = savedTheme;
+$('theme').onclick = () => {
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  store.set('theme', root.dataset.theme);
+};
+
+// "New" = found after this viewer's previous visit (first visit: posted in the last 3 days).
+const lastVisit = store.get('lastVisit', null);
+const firstVisitCut = Date.now() - 3 * 864e5;
+JOBS.forEach(j => {
+  j.isNew = lastVisit ? new Date(j.fs) > new Date(lastVisit) : new Date(j.d) > firstVisitCut;
+});
+store.set('lastVisit', new Date().toISOString());
+
+const saved = new Set(store.get('saved', []));
+const hidden = new Set(store.get('hidden', []));
+const state = { q: '', sort: store.get('sort', 'date'), src: '', cats: new Set(), pay: false, onlyNew: false, onlySaved: false, showHidden: false };
+$('sort').value = state.sort;
+
+function ago(iso) {
+  const h = (Date.now() - new Date(iso)) / 36e5;
+  if (h < 1) return 'just now';
+  if (h < 24) return Math.round(h) + 'h ago';
+  const d = Math.round(h / 24);
+  return d === 1 ? 'yesterday' : d + ' days ago';
+}
+function money(n) { return n >= 1000 ? '$' + Math.round(n).toLocaleString() : '$' + (Math.round(n * 100) / 100).toLocaleString(); }
+
+// Header
+$('updated').textContent = 'Updated ' + ago(META.generated) + ' · jobs from the last ' + META.days + ' days';
+
+function renderStats() {
+  const visible = JOBS.filter(j => !hidden.has(j.id));
+  const withPay = visible.filter(j => j.p).length;
+  const top = Math.max(0, ...visible.map(j => j.usd || 0));
+  const items = [
+    ['', visible.length, 'open jobs'],
+    ['blue', visible.filter(j => j.isNew).length, lastVisit ? 'new since your last visit' : 'new in the last 3 days'],
+    ['accent', withPay, 'list a price'],
+    ['accent', top ? '≈' + money(top) : '–', 'highest listed pay'],
+  ];
+  $('stats').innerHTML = items.map(([c, b, s]) => `<div class="stat ${c}"><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join('');
+}
+
+// Sources
+[...new Set(JOBS.map(j => j.s))].sort().forEach(s => {
+  const o = document.createElement('option'); o.value = s; o.textContent = s; $('src').appendChild(o);
+});
+$('sources').innerHTML = META.sources.map(s => {
+  const err = Object.keys(META.errors).find(k => k === s);
+  return `<li>${esc(s)}${err ? ` <span class="err">(not searched: ${esc(META.errors[err])})</span>` : ''}</li>`;
+}).join('');
+
+// Chips
+const CAT_ORDER = ['Props & assets', 'Weapons & tools', 'Vehicles', 'Characters & creatures', 'UGC & accessories', 'Maps & environments', 'General 3D'];
+function renderChips() {
+  const counts = {};
+  JOBS.forEach(j => { if (!hidden.has(j.id)) j.c.forEach(c => counts[c] = (counts[c] || 0) + 1); });
+  const cats = CAT_ORDER.filter(c => counts[c]);
+  const chip = (key, label, pressed, n, cls = '') =>
+    `<button class="chip ${cls}" data-k="${esc(key)}" aria-pressed="${pressed}">${esc(label)}${n != null ? ` <span class="n">${n}</span>` : ''}</button>`;
+  $('chips').innerHTML =
+    cats.map(c => chip('cat:' + c, c, state.cats.has(c), counts[c])).join('') +
+    '<span class="sep"></span>' +
+    chip('pay', 'Price listed', state.pay, null, 'toggle') +
+    chip('new', 'New only', state.onlyNew, null, 'toggle') +
+    chip('saved', '★ Saved', state.onlySaved, saved.size, 'toggle');
+}
+$('chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  const k = b.dataset.k;
+  if (k.startsWith('cat:')) { const c = k.slice(4); state.cats.has(c) ? state.cats.delete(c) : state.cats.add(c); }
+  else if (k === 'pay') state.pay = !state.pay;
+  else if (k === 'new') state.onlyNew = !state.onlyNew;
+  else if (k === 'saved') state.onlySaved = !state.onlySaved;
+  render();
+});
+
+const ICON = {
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+  hide: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c5 0 9 4.5 10 7a13 13 0 0 1-3 4.2M6.2 6.3A13 13 0 0 0 2 12c1 2.5 5 7 10 7a9.8 9.8 0 0 0 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
+  show: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12c1-2.5 5-7 10-7s9 4.5 10 7c-1 2.5-5 7-10 7S3 14.5 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>',
+  ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+};
+
+function card(j) {
+  const usd = j.usd && /robux|r\$/i.test(j.p) ? ` <span title="Rough value at Roblox's DevEx rate">(≈${money(j.usd)})</span>` : '';
+  const isHidden = hidden.has(j.id);
+  return `<article class="job${j.isNew ? ' is-new' : ''}" data-id="${esc(j.id)}">
+    <div class="job-head">
+      <div class="job-main">
+        <h2><a href="${esc(j.u)}" target="_blank" rel="noopener noreferrer">${esc(j.t)}</a></h2>
+        <div class="meta">
+          <span>${esc(j.ss)}</span><span class="dot">${ago(j.d)}</span>${j.a ? `<span class="dot">by ${esc(j.a)}</span>` : ''}
+        </div>
+      </div>
+      <div class="actions">
+        <button class="icon${saved.has(j.id) ? ' on' : ''}" data-act="save" title="${saved.has(j.id) ? 'Remove from saved' : 'Save for later'}" aria-label="Save job" aria-pressed="${saved.has(j.id)}">${ICON.star}</button>
+        <button class="icon" data-act="hide" title="${isHidden ? 'Unhide' : 'Hide this job'}" aria-label="${isHidden ? 'Unhide job' : 'Hide job'}">${isHidden ? ICON.show : ICON.hide}</button>
+      </div>
+    </div>
+    <div class="badges">
+      ${j.isNew ? '<span class="badge new">NEW</span>' : ''}
+      ${j.p ? `<span class="badge pay">${esc(j.p)}${usd}</span>` : ''}
+      ${j.studio ? '<span class="badge studio">Studio job</span>' : ''}
+      ${j.c.map(c => `<span class="badge">${esc(c)}</span>`).join('')}
+      ${j.f.map(f => `<span class="badge warn">${esc(f)}</span>`).join('')}
+    </div>
+    ${j.x ? `<details><summary>${ICON.chev}Read the post</summary><div class="body">${esc(j.x)}</div>
+      <a class="open" href="${esc(j.u)}" target="_blank" rel="noopener noreferrer">Open original post ${ICON.ext}</a></details>` : ''}
+  </article>`;
+}
+
+function render() {
+  const q = state.q.toLowerCase().trim();
+  let r = JOBS.filter(j =>
+    (state.showHidden ? true : !hidden.has(j.id)) &&
+    (!state.src || j.s === state.src) &&
+    (!state.cats.size || j.c.some(c => state.cats.has(c))) &&
+    (!state.pay || j.p) && (!state.onlyNew || j.isNew) && (!state.onlySaved || saved.has(j.id)) &&
+    (!q || (j.t + ' ' + j.x + ' ' + j.p + ' ' + j.a).toLowerCase().includes(q)));
+  const by = { date: (a, b) => b.d.localeCompare(a.d), pay: (a, b) => (b.usd || 0) - (a.usd || 0) || b.d.localeCompare(a.d), score: (a, b) => b.sc - a.sc };
+  r.sort(by[state.sort]);
+  const nHidden = JOBS.filter(j => hidden.has(j.id)).length;
+  $('count').innerHTML = `<span>Showing ${r.length} of ${JOBS.length - nHidden} jobs</span>` +
+    (nHidden ? `<button class="linkbtn" id="toggleHidden">${state.showHidden ? 'Stop showing' : 'Show'} ${nHidden} hidden</button>` : '');
+  $('list').innerHTML = r.length ? r.map(card).join('') :
+    `<div class="empty">${JOBS.length ? 'No jobs match these filters. Try clearing a filter or the search.' : 'No open jobs found right now. Check back later.'}</div>`;
+  renderChips(); renderStats();
+}
+
+$('list').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const id = b.closest('.job').dataset.id;
+  const set = b.dataset.act === 'save' ? saved : hidden;
+  set.has(id) ? set.delete(id) : set.add(id);
+  store.set('saved', [...saved]); store.set('hidden', [...hidden]);
+  render();
+});
+$('count').addEventListener('click', e => { if (e.target.id === 'toggleHidden') { state.showHidden = !state.showHidden; render(); } });
+$('q').addEventListener('input', e => { state.q = e.target.value; render(); });
+$('sort').addEventListener('input', e => { state.sort = e.target.value; store.set('sort', state.sort); render(); });
+$('src').addEventListener('input', e => { state.src = e.target.value; render(); });
+render();
+</script>
+</body>
+</html>

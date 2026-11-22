@@ -1,0 +1,7 @@
+# Private Reddit key - never upload
+config.json
+# Generated output
+jobs.html
+jobs.csv
+site/
+__pycache__/

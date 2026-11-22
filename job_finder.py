@@ -545,14 +545,14 @@ def write_csv(jobs, path):
                         j["pay"], j["usd_text"] or (f"${j['usd']:,.0f}" if j["usd"] else ""), "; ".join(j["flags"]), j["author"], j["url"], j["text"][:1500]])
 
 
-def write_html(jobs, path, errors, days, schedule_minute=None):
+def write_html(jobs, path, errors, days, schedule_minutes=None):
     rows = [{"id": j["url"], "t": j["title"], "u": j["url"],
              "s": "Reddit" if j["source"].startswith("Reddit") else j["source"], "ss": j["source"],
              "a": j["author"], "d": j["posted"].isoformat(), "fs": j["first_seen"], "p": j["pay"],
              "usd": j["usd"], "c": j["cats"], "x": j["text"][:3500], "sc": j["score"], "f": j["flags"],
              "studio": bool(j.get("_studio")), "up": UNPAID_FLAG in j["flags"], "uc": j["usd_text"]} for j in jobs]
     meta = {"generated": datetime.now(timezone.utc).isoformat(), "days": days,
-            "errors": errors, "sources": [label for label, _ in SOURCES], "schedule_minute": schedule_minute}
+            "errors": errors, "sources": [label for label, _ in SOURCES], "schedule_minutes": schedule_minutes}
     page = (TEMPLATE_FILE.read_text(encoding="utf-8")
             .replace("__DATA__", json.dumps(rows).replace("</", "<\\/"))
             .replace("__META__", json.dumps(meta).replace("</", "<\\/")))
@@ -566,8 +566,8 @@ def main():
     ap.add_argument("--days", type=int, default=30)
     ap.add_argument("--no-open", action="store_true")
     ap.add_argument("--out", help="where to write the page (default jobs.html next to this script)")
-    ap.add_argument("--schedule-minute", type=int, default=None,
-                    help="minute past each hour the website rebuilds (shows a next-update countdown)")
+    ap.add_argument("--schedule-minutes", type=lambda v: sorted(int(x) for x in v.split(",")), default=None,
+                    help="minutes past each hour the website rebuilds, e.g. 0,30 (shows a next-update countdown)")
     args = ap.parse_args()
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=args.days)
@@ -631,7 +631,7 @@ def main():
 
     jobs.sort(key=lambda j: j["posted"], reverse=True)
     out = Path(args.out).resolve() if args.out else HERE / "jobs.html"
-    write_html(jobs, out, errors, args.days, args.schedule_minute)
+    write_html(jobs, out, errors, args.days, args.schedule_minutes)
     write_csv(jobs, out.with_suffix(".csv"))
     new = sum(j["first_seen"] == now for j in jobs)
     log(f"\nFound {len(jobs)} Roblox modeling jobs ({new} new since the last run).")

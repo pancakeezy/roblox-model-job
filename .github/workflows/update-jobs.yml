@@ -1,10 +1,10 @@
-# Reruns the job search every hour (at :17) and publishes the page on GitHub Pages.
-# If you change the minute here, change --schedule-minute below to match.
+# Reruns the job search every 30 minutes (at :00 and :30) and publishes the page on GitHub Pages.
+# If you change the minutes here, change --schedule-minutes below to match.
 name: Update job board
 
 on:
   schedule:
-    - cron: "17 * * * *"
+    - cron: "0,30 * * * *"
   workflow_dispatch:      # "Run workflow" button on the Actions tab
   push:
     branches: [main]
@@ -34,7 +34,7 @@ jobs:
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
           PYTHONIOENCODING: utf-8
-        run: python job_finder.py --no-open --out site/index.html --schedule-minute 17
+        run: python job_finder.py --no-open --out site/index.html --schedule-minutes 0,30
 
       - name: Remember which jobs were already found
         run: |

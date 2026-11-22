@@ -260,13 +260,17 @@ function ago(iso) {
 }
 function money(n) { return n >= 1000 ? '$' + Math.round(n).toLocaleString() : '$' + (Math.round(n * 100) / 100).toLocaleString(); }
 
-// Header: last update, and a countdown to the next hourly rebuild on the website.
+// Header: last update, and a countdown to the next scheduled rebuild (e.g. :00 and :30) on the website.
 function nextRun(after) {
-  const d = new Date(after);
-  d.setUTCSeconds(0, 0);
-  d.setUTCMinutes(META.schedule_minute);
-  while (d <= after) d.setUTCHours(d.getUTCHours() + 1);
-  return d;
+  let best = null;
+  for (const add of [0, 1]) {
+    for (const m of META.schedule_minutes) {
+      const d = new Date(after);
+      d.setUTCHours(d.getUTCHours() + add, m, 0, 0);
+      if (d > after && (!best || d < best)) best = d;
+    }
+  }
+  return best;
 }
 function mins(ms) {
   const m = Math.max(0, Math.ceil(ms / 6e4));
@@ -274,7 +278,7 @@ function mins(ms) {
 }
 function clock() {
   $('updated').textContent = 'Updated ' + ago(META.generated) + ' · jobs from the last ' + META.days + ' days';
-  if (META.schedule_minute == null) return;          // run on a PC by hand: no schedule
+  if (!META.schedule_minutes || !META.schedule_minutes.length) return;   // run on a PC by hand: no schedule
   const now = new Date(), last = new Date(META.generated);
   const due = nextRun(last);                          // the run that should replace this page
   const box = $('next'); box.hidden = false;

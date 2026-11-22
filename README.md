@@ -17,12 +17,11 @@ From a terminal you can add options:
 
 ```
 python job_finder.py --days 60            # look back 60 days instead of 30
-python job_finder.py --include-unpaid     # also show volunteer / % posts (marked)
 ```
 
 ## Share it with friends (auto-updating website)
 
-GitHub reruns the search every hour and put the page on a free website, so friends just open a link. It works even when your PC is off. Each friend's saved and hidden jobs are kept in their own browser.
+GitHub reruns the search every hour and puts the page on a free website, so friends just open a link. It works even when your PC is off. Each friend's saved and hidden jobs are kept in their own browser.
 
 1. Make a free account at https://github.com
 2. Create a **new public repository** named `roblox-model-jobs`. Leave it empty: no README.
@@ -40,7 +39,8 @@ The website is public: anyone with the link can see it. It only shows posts that
 
 | Source | Notes |
 |---|---|
-| Roblox DevForum: Find & Hire Talent | The main source, with about 1–3 new hiring posts a day |
+| Roblox DevForum: Find & Hire Talent | About 1–3 new hiring posts a day |
+| Freelancer.com | Paid Roblox projects (models, UGC, armor, vehicles, maps) with a budget in each post |
 | Work With Indies | Game-studio jobs (3D/character/environment artist) that mention Roblox |
 | Mastodon | Hiring posts under #robloxdev, #robloxstudio, #robloxugc and similar hashtags |
 | BlenderArtists Paid Work, Polycount job boards | Only posts that mention Roblox |
@@ -49,7 +49,7 @@ The website is public: anyone with the link can see it. It only shows posts that
 It automatically skips:
 - closed or filled posts
 - artists advertising themselves ("for hire", portfolios)
-- volunteer, %-of-revenue and "passion project" posts
+- volunteer, %-of-revenue and "passion project" posts are hidden unless you turn on **Include unpaid / %** on the page
 - jobs that aren't for modelers, such as scripter, UI, clothing or thumbnail jobs
 
 ## Not covered (and why)

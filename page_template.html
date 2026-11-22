@@ -246,7 +246,8 @@ store.set('lastVisit', new Date().toISOString());
 
 const saved = new Set(store.get('saved', []));
 const hidden = new Set(store.get('hidden', []));
-const state = { q: '', sort: store.get('sort', 'date'), src: '', cats: new Set(), pay: false, onlyNew: false, onlySaved: false, showHidden: false };
+const state = { q: '', sort: store.get('sort', 'date'), src: '', cats: new Set(), pay: false, onlyNew: false, onlySaved: false, showHidden: false, showUnpaid: store.get('showUnpaid', false) };
+const inScope = j => state.showUnpaid || !j.up;
 $('sort').value = state.sort;
 
 function ago(iso) {
@@ -308,7 +309,7 @@ clock();
 setInterval(clock, 15000);
 
 function renderStats() {
-  const visible = JOBS.filter(j => !hidden.has(j.id));
+  const visible = JOBS.filter(j => !hidden.has(j.id) && inScope(j));
   const withPay = visible.filter(j => j.p).length;
   const top = Math.max(0, ...visible.map(j => j.usd || 0));
   const items = [
@@ -347,8 +348,9 @@ $('quick').innerHTML = QUICK.map(([k, label, url]) =>
 const CAT_ORDER = ['Props & assets', 'Weapons & tools', 'Vehicles', 'Characters & creatures', 'UGC & accessories', 'Maps & environments', 'General 3D'];
 function renderChips() {
   const counts = {};
-  JOBS.forEach(j => { if (!hidden.has(j.id)) j.c.forEach(c => counts[c] = (counts[c] || 0) + 1); });
+  JOBS.forEach(j => { if (!hidden.has(j.id) && inScope(j)) j.c.forEach(c => counts[c] = (counts[c] || 0) + 1); });
   const cats = CAT_ORDER.filter(c => counts[c]);
+  const nUnpaid = JOBS.filter(j => j.up && !hidden.has(j.id)).length;
   const chip = (key, label, pressed, n, cls = '') =>
     `<button class="chip ${cls}" data-k="${esc(key)}" aria-pressed="${pressed}">${esc(label)}${n != null ? ` <span class="n">${n}</span>` : ''}</button>`;
   $('chips').innerHTML =
@@ -356,7 +358,8 @@ function renderChips() {
     '<span class="sep"></span>' +
     chip('pay', 'Price listed', state.pay, null, 'toggle') +
     chip('new', 'New only', state.onlyNew, null, 'toggle') +
-    chip('saved', '★ Saved', state.onlySaved, saved.size, 'toggle');
+    chip('saved', '★ Saved', state.onlySaved, saved.size, 'toggle') +
+    (nUnpaid ? chip('unpaid', 'Include unpaid / %', state.showUnpaid, nUnpaid, 'toggle') : '');
 }
 $('chips').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if (!b) return;
@@ -365,6 +368,7 @@ $('chips').addEventListener('click', e => {
   else if (k === 'pay') state.pay = !state.pay;
   else if (k === 'new') state.onlyNew = !state.onlyNew;
   else if (k === 'saved') state.onlySaved = !state.onlySaved;
+  else if (k === 'unpaid') { state.showUnpaid = !state.showUnpaid; store.set('showUnpaid', state.showUnpaid); }
   render();
 });
 
@@ -407,15 +411,16 @@ function card(j) {
 function render() {
   const q = state.q.toLowerCase().trim();
   let r = JOBS.filter(j =>
-    (state.showHidden ? true : !hidden.has(j.id)) &&
+    (state.showHidden ? true : !hidden.has(j.id)) && inScope(j) &&
     (!state.src || j.s === state.src) &&
     (!state.cats.size || j.c.some(c => state.cats.has(c))) &&
     (!state.pay || j.p) && (!state.onlyNew || j.isNew) && (!state.onlySaved || saved.has(j.id)) &&
     (!q || (j.t + ' ' + j.x + ' ' + j.p + ' ' + j.a).toLowerCase().includes(q)));
   const by = { date: (a, b) => b.d.localeCompare(a.d), pay: (a, b) => (b.usd || 0) - (a.usd || 0) || b.d.localeCompare(a.d), score: (a, b) => b.sc - a.sc };
   r.sort(by[state.sort]);
-  const nHidden = JOBS.filter(j => hidden.has(j.id)).length;
-  $('count').innerHTML = `<span>Showing ${r.length} of ${JOBS.length - nHidden} jobs</span>` +
+  const nHidden = JOBS.filter(j => hidden.has(j.id) && inScope(j)).length;
+  const nTotal = JOBS.filter(j => !hidden.has(j.id) && inScope(j)).length;
+  $('count').innerHTML = `<span>Showing ${r.length} of ${nTotal} ${state.showUnpaid ? '' : 'paid '}jobs</span>` +
     (nHidden ? `<button class="linkbtn" id="toggleHidden">${state.showHidden ? 'Stop showing' : 'Show'} ${nHidden} hidden</button>` : '');
   $('list').innerHTML = r.length ? r.map(card).join('') :
     `<div class="empty">${JOBS.length ? 'No jobs match these filters. Try clearing a filter or the search.' : 'No open jobs found right now. Check back later.'}</div>`;

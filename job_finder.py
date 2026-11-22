@@ -10,7 +10,6 @@ and writes:
 Run:            python job_finder.py
 Options:
     --days N          only posts from the last N days (default 30)
-    --include-unpaid  also show volunteer / % / rev-share posts (marked)
     --no-open         don't open the report when finished
 
 Sources: Roblox DevForum (Find & Hire Talent), Reddit (needs a free key, run
@@ -68,7 +67,9 @@ UNPAID = re.compile(r"\bunpaid\b|\bvolunteers?\b|\bvolunteer position\b|\[\s*%|%
 HIRING = re.compile(r"\[\s*(hiring|paid|job|task|open|commission)[^\]]*\]|\bhiring\b|\bpaid\b|\blooking for\b|\blf\b|\bneeded\b"
                     r"|\bneed(ed)? (a|an|some)\b|\bseeking\b|\bwanted\b|\bcommission\b|\brecruit", re.I)
 NOT_MODEL_ROLE = re.compile(r"\b(scripter|programmer|ui designer|ui/ux|gfx artist|thumbnail|voice actor|clothing designer"
-                            r"|shirt|pants|sfx|music|composer|video editor|content creator|youtuber|clipper)\b", re.I)
+                            r"|shirt|pants|sfx|music|composer|video editor|content creator|youtuber|clipper"
+                            r"|animator|animation|video|voice ?over|playtest|tester|qa|backend|marketing|shopify)\b", re.I)
+UNPAID_FLAG = "volunteer / % / unpaid"
 PAY = re.compile(
     r"(?:(?:usd|us\$|\$|€|£|r\$|robux)\s?\d[\d,.]*\s*k?(?:\s*(?:-|–|to)\s*(?:\$|r\$)?\s?\d[\d,.]*\s*k?)?"
     r"(?:\s*(?:/|per|an?)\s*(?:hr|hour|model|asset|prop|item|map|day|week|month|project))?"
@@ -320,6 +321,48 @@ def src_mastodon(cutoff, args):
     return jobs
 
 
+# Rough exchange rates, only for the "about $" estimate and pay sorting.
+ROUGH_USD = {"USD": 1, "EUR": 1.08, "GBP": 1.27, "AUD": 0.65, "CAD": 0.72, "NZD": 0.6, "SGD": 0.74,
+             "INR": 0.012, "PHP": 0.017, "HKD": 0.13, "JPY": 0.0066, "SEK": 0.095, "PLN": 0.25}
+FREELANCER_QUERIES = ["roblox", "roblox 3d model", "roblox ugc", "roblox blender", "roblox map"]
+
+
+def src_freelancer(cutoff, args):
+    """Freelancer.com public project search (no account needed to search)."""
+    jobs, seen = [], set()
+    for q in FREELANCER_QUERIES:
+        qs = urllib.parse.urlencode({"query": q, "limit": 100, "full_description": "true",
+                                     "job_details": "true", "sort_field": "time_updated"})
+        try:
+            data = fetch_json(f"https://www.freelancer.com/api/projects/0.1/projects/active/?{qs}")
+        except Exception as e:
+            log(f"    '{q}': {e}")
+            continue
+        for p in (data.get("result") or {}).get("projects", []):
+            if p.get("id") in seen:
+                continue
+            seen.add(p.get("id"))
+            b = p.get("budget") or {}
+            cur = (p.get("currency") or {}).get("code", "")
+            lo, hi = b.get("minimum"), b.get("maximum")
+            hourly = p.get("type") == "hourly"
+            pay = ""
+            if lo:
+                pay = f"{lo:,.0f}" + (f"–{hi:,.0f}" if hi and hi != lo else "") + f" {cur}" + ("/hr" if hourly else " budget")
+            skills = [j.get("name", "") for j in p.get("jobs") or []]
+            title = re.sub(r"\s*--\s*\d+$", "", p.get("title", ""))
+            job = make_job("Freelancer.com", title, f"https://www.freelancer.com/projects/{p.get('seo_url', p.get('id'))}",
+                           parse_time(p.get("time_submitted")),
+                           (p.get("description") or p.get("preview_description") or "") + (f"\n\nBudget: {pay}" if pay else ""),
+                           tags=skills, _need_roblox=True, _strict_roblox=True)
+            job["_pay"] = pay
+            if hi or lo:
+                job["_usd"] = round((hi or lo) * ROUGH_USD.get(cur, 0), 2) or None
+            jobs.append(job)
+        time.sleep(1)
+    return jobs
+
+
 X_QUERY = ('(roblox OR robux OR "roblox studio") '
            '(modeler OR modeller OR "3d model" OR "3d models" OR blender OR "low poly" OR ugc OR "3d artist" OR mesh) '
            '(hiring OR "looking for" OR commission OR paid OR "need a") -is:retweet')
@@ -368,6 +411,7 @@ def src_x(cutoff, args):
 
 SOURCES = [
     ("Roblox DevForum (Find & Hire Talent)", src_devforum),
+    ("Freelancer.com (Roblox projects)", src_freelancer),
     ("Reddit", src_reddit),
     ("X (Twitter)", src_x),
     ("Work With Indies (Roblox studios)", src_workwithindies),
@@ -430,6 +474,8 @@ def classify(job, include_unpaid):
         return False, 0, "", []
     if job.get("_need_roblox") and not ROBLOX.search(full):
         return False, 0, "", []
+    if job.get("_strict_roblox") and not re.search(r"\broblox\b", title + "\n" + body, re.I):
+        return False, 0, "", []  # e.g. "UGC" marketing videos on general freelance sites
     model_hits = words_in(f"{title}\n{tags}\n{body[:1500]}", MODEL_WORDS)
     if not model_hits:
         return False, 0, "", []
@@ -448,7 +494,7 @@ def classify(job, include_unpaid):
     if unpaid:
         if not include_unpaid:
             return False, 0, "", []
-        flags.append("volunteer / % / unpaid")
+        flags.append(UNPAID_FLAG)
     if not words_in(title + " " + tags, ["modeler", "modeller", "modeling", "modelling", "3d", "blender",
                                           "mesh", "props", "ugc", "low poly", "model", "models"]):
         if words_in(full, ["builder", "map builder"]):
@@ -481,7 +527,7 @@ def write_html(jobs, path, errors, days, schedule_minute=None):
              "s": "Reddit" if j["source"].startswith("Reddit") else j["source"], "ss": j["source"],
              "a": j["author"], "d": j["posted"].isoformat(), "fs": j["first_seen"], "p": j["pay"],
              "usd": j["usd"], "c": j["cats"], "x": j["text"][:3500], "sc": j["score"], "f": j["flags"],
-             "studio": bool(j.get("_studio"))} for j in jobs]
+             "studio": bool(j.get("_studio")), "up": UNPAID_FLAG in j["flags"]} for j in jobs]
     meta = {"generated": datetime.now(timezone.utc).isoformat(), "days": days,
             "errors": errors, "sources": [label for label, _ in SOURCES], "schedule_minute": schedule_minute}
     page = (TEMPLATE_FILE.read_text(encoding="utf-8")
@@ -495,7 +541,6 @@ def write_html(jobs, path, errors, days, schedule_minute=None):
 def main():
     ap = argparse.ArgumentParser(description="Find paid Roblox 3D modeling jobs.")
     ap.add_argument("--days", type=int, default=30)
-    ap.add_argument("--include-unpaid", action="store_true")
     ap.add_argument("--no-open", action="store_true")
     ap.add_argument("--out", help="where to write the page (default jobs.html next to this script)")
     ap.add_argument("--schedule-minute", type=int, default=None,
@@ -535,7 +580,8 @@ def main():
 
     jobs = []
     for j in candidates:
-        keep, score, pay, flags = classify(j, args.include_unpaid)
+        keep, score, pay, flags = classify(j, True)  # unpaid posts are kept but marked; the page hides them
+        pay = j.get("_pay") or pay
         if keep:
             j.update(score=score, pay=pay, flags=flags)
             jobs.append(j)
@@ -552,7 +598,7 @@ def main():
     for j in jobs:
         j["first_seen"] = seen.setdefault(j["url"], now)
         j["cats"] = categorize(j)
-        j["usd"] = estimate_usd(j["pay"])
+        j["usd"] = j.get("_usd") or estimate_usd(j["pay"])
     SEEN_FILE.write_text(json.dumps(seen), encoding="utf-8")
 
     jobs.sort(key=lambda j: j["posted"], reverse=True)

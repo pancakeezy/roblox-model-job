@@ -22,7 +22,7 @@ python job_finder.py --include-unpaid     # also show volunteer / % posts (marke
 
 ## Share it with friends (auto-updating website)
 
-GitHub can run the search every 4 hours and put the page on a free website, so friends just open a link. It works even when your PC is off. Each friend's saved and hidden jobs are kept in their own browser.
+GitHub reruns the search every hour and put the page on a free website, so friends just open a link. It works even when your PC is off. Each friend's saved and hidden jobs are kept in their own browser.
 
 1. Make a free account at https://github.com
 2. Create a **new public repository** named `roblox-model-jobs`. Leave it empty: no README.

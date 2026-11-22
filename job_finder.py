@@ -320,9 +320,56 @@ def src_mastodon(cutoff, args):
     return jobs
 
 
+X_QUERY = ('(roblox OR robux OR "roblox studio") '
+           '(modeler OR modeller OR "3d model" OR "3d models" OR blender OR "low poly" OR ugc OR "3d artist" OR mesh) '
+           '(hiring OR "looking for" OR commission OR paid OR "need a") -is:retweet')
+X_CACHE = HERE / "x_cache.json"
+
+
+def src_x(cutoff, args):
+    """X (Twitter) via the official API. Needs a paid X API bearer token in X_BEARER_TOKEN.
+    To keep API costs down it only searches every X_EVERY_HOURS hours (default 6) and reuses
+    the last results in between."""
+    token = os.environ.get("X_BEARER_TOKEN") or load_config().get("x", {}).get("bearer_token", "")
+    if not token:
+        raise RuntimeError("skipped: needs an X API key (see README)")
+    every = int(os.environ.get("X_EVERY_HOURS", "6"))
+    cache = {}
+    if X_CACHE.exists():
+        try:
+            cache = json.loads(X_CACHE.read_text(encoding="utf-8"))
+        except Exception:
+            cache = {}
+    last = parse_time(cache.get("fetched"))
+    if last and datetime.now(timezone.utc) - last < timedelta(hours=every) - timedelta(minutes=10):
+        posts = cache.get("posts", [])
+    else:
+        qs = urllib.parse.urlencode({"query": X_QUERY, "max_results": 100, "tweet.fields": "created_at,author_id",
+                                     "expansions": "author_id", "user.fields": "username"})
+        data = fetch_json(f"https://api.x.com/2/tweets/search/recent?{qs}",
+                          headers={"Authorization": f"Bearer {token}"})
+        users = {u["id"]: u.get("username", "") for u in (data.get("includes") or {}).get("users", [])}
+        posts = [{"id": t["id"], "text": t.get("text", ""), "created_at": t.get("created_at"),
+                  "user": users.get(t.get("author_id"), "")} for t in data.get("data", [])]
+        # Keep older cached posts too (recent search only looks back 7 days).
+        old = {p["id"]: p for p in cache.get("posts", [])}
+        old.update({p["id"]: p for p in posts})
+        posts = list(old.values())
+        X_CACHE.write_text(json.dumps({"fetched": datetime.now(timezone.utc).isoformat(), "posts": posts}),
+                           encoding="utf-8")
+    jobs = []
+    for p in posts:
+        user = p.get("user") or "i"
+        jobs.append(make_job("X (Twitter)", p["text"].split("\n")[0][:140],
+                             f"https://x.com/{user}/status/{p['id']}", parse_time(p.get("created_at")),
+                             p["text"], author="@" + user if p.get("user") else "", _social=True))
+    return jobs
+
+
 SOURCES = [
     ("Roblox DevForum (Find & Hire Talent)", src_devforum),
     ("Reddit", src_reddit),
+    ("X (Twitter)", src_x),
     ("Work With Indies (Roblox studios)", src_workwithindies),
     ("Mastodon (#robloxdev and similar)", src_mastodon),
     ("BlenderArtists paid work (Roblox only)", src_blenderartists),

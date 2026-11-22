@@ -111,6 +111,20 @@ details[open] summary svg{transform:rotate(90deg)}
 .open svg{width:14px;height:14px}
 .empty{text-align:center;padding:48px 16px;color:var(--mute);background:var(--surface);border:1px dashed var(--line-2);border-radius:16px}
 
+/* Quick searches */
+.quick{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow)}
+.quick-head{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;margin-bottom:8px}
+.quick-head h3{font-size:14px;margin:0}
+.quick-head span{color:var(--mute);font-size:12.5px}
+.quick-links{display:flex;flex-wrap:wrap;gap:6px}
+.ql{display:inline-flex;align-items:center;gap:7px;text-decoration:none;font-size:13px;border:1px solid var(--line-2);border-radius:9px;padding:5px 10px;color:var(--ink-2);background:var(--bg)}
+.ql:hover{border-color:var(--ink-2);color:var(--ink)}
+.ql b{font-size:11px;font-weight:700;border-radius:5px;padding:1px 5px;color:#fff}
+.ql b.x{background:#000}
+.ql b.r{background:#ff4500}
+:root[data-theme="dark"] .ql b.x{background:#333}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ql b.x{background:#333}}
+
 /* Footer */
 .foot{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;font-size:13.5px;color:var(--ink-2)}
@@ -173,6 +187,13 @@ details[open] summary svg{transform:rotate(90deg)}
 </div>
 
 <main class="wrap">
+  <section class="quick" aria-labelledby="quickTitle">
+    <div class="quick-head">
+      <h3 id="quickTitle">Check live on X &amp; Reddit</h3>
+      <span>One-click searches, newest posts first. Opens in a new tab.</span>
+    </div>
+    <div class="quick-links" id="quick"></div>
+  </section>
   <div class="count" id="count"></div>
   <div id="list"></div>
   <div class="foot">
@@ -307,6 +328,20 @@ $('sources').innerHTML = META.sources.map(s => {
   const err = Object.keys(META.errors).find(k => k === s);
   return `<li>${esc(s)}${err ? ` <span class="err">(not searched: ${esc(META.errors[err])})</span>` : ''}</li>`;
 }).join('');
+
+// One-click live searches on X and Reddit (no account or API needed to open these).
+const QUICK = [
+  ['x', 'Roblox modeler hiring', 'https://x.com/search?f=live&q=' + encodeURIComponent('roblox (modeler OR "3d modeler" OR "3d artist") (hiring OR "looking for")')],
+  ['x', 'Roblox UGC commissions', 'https://x.com/search?f=live&q=' + encodeURIComponent('roblox ugc (commission OR hiring OR "looking for") (modeler OR 3d)')],
+  ['x', 'Roblox Blender / low poly', 'https://x.com/search?f=live&q=' + encodeURIComponent('roblox (blender OR "low poly" OR mesh) (hiring OR commission OR paid)')],
+  ['r', 'r/robloxgamedev hiring', 'https://www.reddit.com/r/robloxgamedev/search/?restrict_sr=1&sort=new&q=' + encodeURIComponent('hiring OR "looking for" modeler')],
+  ['r', 'r/RobloxDevelopers new', 'https://www.reddit.com/r/RobloxDevelopers/new/'],
+  ['r', 'r/gameDevClassifieds Roblox', 'https://www.reddit.com/r/gameDevClassifieds/search/?restrict_sr=1&sort=new&q=roblox'],
+  ['r', 'r/HungryArtists Roblox', 'https://www.reddit.com/r/HungryArtists/search/?restrict_sr=1&sort=new&q=roblox'],
+  ['r', 'All of Reddit', 'https://www.reddit.com/search/?sort=new&q=' + encodeURIComponent('roblox modeler hiring')],
+];
+$('quick').innerHTML = QUICK.map(([k, label, url]) =>
+  `<a class="ql" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><b class="${k}">${k === 'x' ? 'X' : 'Reddit'}</b>${esc(label)}</a>`).join('');
 
 // Chips
 const CAT_ORDER = ['Props & assets', 'Weapons & tools', 'Vehicles', 'Characters & creatures', 'UGC & accessories', 'Maps & environments', 'General 3D'];

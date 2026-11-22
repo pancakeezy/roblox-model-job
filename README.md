@@ -65,6 +65,15 @@ It automatically skips:
 3. If Reddit says you've reached the maximum number of apps, or asks for an access request, Reddit has to approve your account first.
 4. Run `python setup_reddit.py` and paste the **client ID** and **secret**. They're saved in `config.json`, which is never uploaded.
 
+## X (Twitter) setup (optional, paid)
+
+X only lets programs search posts through its paid API. The free tier can't search.
+1. Get API access at https://developer.x.com and copy the app's **Bearer Token**.
+2. In the GitHub repository go to **Settings → Secrets and variables → Actions → New repository secret**, name it `X_BEARER_TOKEN`, and paste the token.
+
+To save money, the website searches X only every 6 hours and keeps the results in between. To change that, add a variable called `X_EVERY_HOURS`.
+Without a key, the page still has one-click X and Reddit search buttons near the top.
+
 ## Staying safe
 
 Ask for a deposit, or for pay after each finished model. Send previews or screenshots rather than the .blend until you've been paid. Never download "test files" or run programs that a client sends you.
